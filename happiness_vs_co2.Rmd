@@ -2,7 +2,6 @@
 title: "World Happiness Score vs CO2 Emissions"
 author: "Jackson"
 output: github_document
-always_allow_html: true
 date: '2022-06-01'
 ---
 
@@ -31,7 +30,6 @@ library(gapminder)
 library(cluster)
 library(purrr)
 library(infer)
-library(kableExtra)
 library(broom)
 ```
 
@@ -51,25 +49,13 @@ co2_emissions <- read_xlsx("co2_emissions_tonnes_per_person.xlsx") # source: gap
 ## Datasets
 The `happiness_score` data provides a summary of the national average response to the question of life evaluations asking the following "Please imagine a ladder, with steps numbered from 0 at the bottom to 10 at the top. The top of the ladder represents th best possible life for you and he bottom of the ladder represents the worst possible life for you. On which step of the ladder would you say you personally feel you stand at this time?" This measure is also referred to as Cantril life ladder. Gapminder has converted this indicator's scale from 0 to 100 to easily communicate it in terms of percentage
 ```{r}
-happiness_score %>%
-  kable(
-    caption = "World Hapiness Score Before Cleaning"
-  ) %>%
-  kable_styling("striped") %>% 
- scroll_box(height = "500px")
-
+head(happiness_score)
 ```
 
 
 The `co2_emissions` data provides a summary of the carbon dioxide emissions from the burning of fossil fuels (metric tonnes of CO2 per person)
 ```{r}
-co2_emissions %>%
-  kable(
-    caption = "CO2 Emissions (tonnes per person) Before Cleaning"
-  ) %>%
-  kable_styling("striped") %>% 
- scroll_box(height = "500px")
-
+head(co2_emissions)
 ```
 
 
@@ -81,12 +67,6 @@ happiness_score <- happiness_score %>%
                names_to = "year", 
                values_to = "world_happiness_score", 
                values_drop_na = T) # covert from a wide format to a long format
-
-happiness_score %>%
-  kable (
-    caption = "World Happiness Score After Cleaning") %>%
-  kable_styling("striped") %>% 
- scroll_box(height = "500px")
 ```
 ## Transform the `co2_emissions` data to long format and remove NA
 ```{r}
@@ -101,11 +81,6 @@ co2_emissions <- co2_emissions %>%
 # Then turn the column as numeric
 co2_emissions$co2_tonnes_pp <- as.numeric(co2_emissions$co2_tonnes_pp)
 
-co2_emissions %>%
-  kable(
-    caption = "CO2 Emissions (tonnes per person) After Cleaning") %>%
-  kable_styling("striped") %>% 
- scroll_box(height = "500px")
 ```
 
 ## Import continents from `gapminder`
@@ -116,10 +91,6 @@ continent <- gapminder %>%
   select(country, continent) %>%
   distinct() 
 
-continent %>%
-  kable %>%
-  kable_styling("striped") %>% 
- scroll_box(height = "500px")
 ```
 
 ## Merging data sets
@@ -140,12 +111,7 @@ df$country <- as.factor(df$country)
 ## Cleaned Data
 After cleaning, this is the data we are dealing with: it contains 131 countries and 2 variables: world_happiness_score, and co2_tonnes_pp
 ```{r}
-df %>% 
-  kable(
-    caption = "Cleaned data"
-  ) %>%
-  kable_styling("striped") %>% 
- scroll_box(height = "500px")
+head(df)
 ```
 
 
@@ -153,14 +119,7 @@ df %>%
 # Distribution of data
 ## What is the distribution of the World's Happiness Score?
 ```{r}
-summary(df$world_happiness_score) %>% 
-  tidy() %>%
-  kable(
-    caption = "Distribution of the World's Happiness Score (2005-2018)",
-    digits = c(2, 2, 2, 2, 2, 2)) %>%
-  kable_material_dark()
-
-
+summary(df$world_happiness_score)
 ```
 
 ```{r}
@@ -170,11 +129,7 @@ df %>%
   summarise(mean_happiness = mean(world_happiness_score), 
             sd_happiness = sd(world_happiness_score),
             mean_co2 = mean(co2_tonnes_pp),
-            sd_co2 = sd(co2_tonnes_pp)) %>%
-  kable(
-    caption = "Distribution of the each continents happiness Score (2005-2018)",
-    digits = c(0, 2, 2, 2, 2)) %>% 
-  kable_material_dark()
+            sd_co2 = sd(co2_tonnes_pp))
 
 # boxplot with colors
 ggplot() + 
@@ -186,13 +141,6 @@ ggplot() +
 
 ```{r}
 # histogram of world_happiness_score colored by continents
-df %>% 
-  ggplot(aes(world_happiness_score, fill = continent)) +
-  scale_fill_brewer() +
-  geom_histogram(bins=50) +
-  ggtitle("Figure.2 - Distribution of World Happiness Score, 2005-2018") +
-  xlab("World Happiness Score")
-
 # separate histograms of world_happiness_score for each continent
 df %>% 
   ggplot(aes(world_happiness_score, fill = "")) +
@@ -205,10 +153,7 @@ df %>%
 ## What is the distribution of the CO2 emissions (tonnes per person)?
 ```{r}
 # find distribution of the co2_tonnes_pp column
-summary(df$co2_tonnes_pp) %>% 
-  tidy() %>%
-  kable(caption = "Table.2 Distribution of the worlds CO2 emissions (tonnes per person)") %>%
-  kable_material_dark()
+summary(df$co2_tonnes_pp)
 ```
 
 
@@ -222,13 +167,6 @@ ggplot() +
 ```
 
 ```{r}
-# histogram of co2_tonnes_pp colored by continent
-df %>% 
-  ggplot(aes(co2_tonnes_pp, fill = continent)) +
-  scale_fill_brewer() +
-  geom_histogram(bins=50) +
-  ggtitle("Figure.5 - Distribution of CO2 emisisons, 2005-2018") +
-  xlab("CO2 emissions (tonnes per person")
 
 # separate histograms of co2_tonnes_pp for each continent
 df %>% 
@@ -271,23 +209,7 @@ df %>%
   geom_text(aes(label=round(mean_happiness,2)), position = position_dodge(width = 0.9), vjust=-0.25)
 ```
 
-## Top 10 Countries With Lowest Average Happiness Score
-```{r}
-# repeat
-df %>% 
-  group_by(country) %>%
-  summarise(mean_happiness = mean(world_happiness_score)) %>%
-  arrange(mean_happiness) %>%
-  slice(1:10) %>% 
-  ggplot(aes(x = reorder(country, -mean_happiness), y = mean_happiness, fill = mean_happiness)) +
-  scale_fill_gradient(low = "lightblue", high = "darkblue") + 
-  geom_bar(stat = "identity", show.legend = F) + 
-  coord_flip() +
-  ggtitle(wrapper("Figure.8 - Top 10 Countries With Lowest Average Happiness Score (according to Happiness score (WHR)), 2005-2018", width = 55)) +
-  ylab("Happiness Score (WHR)") +
-  xlab("Country") +
-  geom_text(aes(label=round(mean_happiness,2)), position = position_dodge(width = 0.9), vjust=-0.25)
-```
+
 
 
 ## Top 10 Countries With Highest Average CO2 Emissions
@@ -308,23 +230,7 @@ df %>%
   geom_text(aes(label=round(mean_co2_emissions,2)), position = position_dodge(width = 0.9), vjust=-0.25)
 ```
 
-## Top 10 Countries With Lowest Average CO2 Emissions 
-```{r}
-# repeat
-df %>% 
-  group_by(country) %>%
-  summarise(mean_co2_emissions = mean(co2_tonnes_pp)) %>%
-  arrange(mean_co2_emissions) %>%
-  slice(1:10) %>% 
-  ggplot(aes(x = reorder(country, -mean_co2_emissions), y = mean_co2_emissions, fill = mean_co2_emissions)) +
-  scale_fill_gradient(low = "yellow", high = "orange") + 
-  geom_bar(stat = "identity", show.legend = F) + 
-  coord_flip() +
-  ggtitle(wrapper("Figure.10 - Top 10 Countries With Lowest Mean CO2 Emissions (tonnes per person), 2005-2018", width = 55)) +
-  ylab("CO2 Emissions (tonnes per person") +
-  xlab("Country") +
-  geom_text(aes(label=round(mean_co2_emissions,3)), position = position_dodge(width = 0.9), vjust=-0.25)
-```
+
 
 # Visualising the Relationship
 We first use scatter plots to observe relationships between variables.
@@ -360,21 +266,12 @@ By using these values below, we can estimate the `world_happiness_score` manuall
 # Regressing world_happiness_score against co2_tonnes_pp
 regression_df <- lm(world_happiness_score ~ co2_tonnes_pp, data = df) 
 
-summary(regression_df) %>% 
-  tidy() %>%
-  kable(
-    caption = "Regression table",
-    digits = c(0, 2, 3, 2, 3)) %>%
-  kable_material_dark()
+summary(regression_df)
 
 ```
 The `co2_tonnes_pp` variable has a positive coefficient and its p-value is significant at the 5% level. This means statistically, the relationship between `world_happiness` and `co2_tonnes_pp` has a strong positive correlation. An increase of 1 tonnes per person CO2 emission, increases the happiness score by 1.302. 
 
 Regression equation: `world_happiness_score` = 48.75 + 1.30 x `co2_tonnes_pp`
-
-
-
-
 
 
 
@@ -412,10 +309,7 @@ df_by_country <- df %>%
 
 df_by_country$co2_rel <- as.factor(df_by_country$co2_rel)
 
-df_by_country %>% 
-  kable(digits = c(0, 0, 2, 2, 2, 2)) %>%
-  kable_styling("striped") %>% 
- scroll_box(height = "500px")
+head(df_by_country)
 ```
 
 
@@ -432,9 +326,7 @@ The Alternative Hypothesis is "The mean happiness of countries with above averag
 # use t_test as the variables are continuous data
 df_by_country %>% t_test(country_happiness ~ co2_rel,
                order = c("above average", "below average"),
-               alternative = "two.sided") %>% # two tail test to test NOT EQUAL
-  kable(digits = c(2, 2, 10, 0, 2, 2, 2)) %>% 
-  kable_material_dark
+               alternative = "two.sided")
 ```
 P-value is statistically significance using 5% level.
 This infers that there is a difference in the happiness score between countries emitting CO2 above and below its continent's average. We reject the null hypothesis.
@@ -444,9 +336,7 @@ This is supported by the below output where it shows the `mean_happiness` for ab
 # find average happiness by co2_rel
 df_by_country %>%
   group_by(co2_rel) %>%
-  summarise(mean_happiness = mean(country_happiness)) %>%
-  kable(digits = c(0, 2)) %>%
-  kable_material_dark()
+  summarise(mean_happiness = mean(country_happiness))
 ```
 When we test if the happiness is higher in those countries emitting above its continent average co2.
 The p-value is significant, inferring that we reject the Null hypothesis.
@@ -455,9 +345,7 @@ The p-value is significant, inferring that we reject the Null hypothesis.
 ```{r}
 df_by_country %>% t_test(country_happiness ~ co2_rel,
                order = c("above average", "below average"),
-               alternative = "greater") %>%
-  kable(digits = c(2, 2, 10, 0, 2, 2)) %>%
-  kable_material_dark()
+               alternative = "greater")
 ```
 
 
@@ -466,17 +354,12 @@ As expected, the p-value is really close to 1. So we failed to reject this null 
 ```{r}
 df_by_country %>% t_test(country_happiness ~ co2_rel,
                order = c("above average", "below average"),
-               alternative = "less") %>%
-  kable(digits = c(2, 2, 10, 0, 2, 0, 2)) %>%
-  kable_material_dark()
+               alternative = "less")
 ```
 We can also look at the relationship between `country_happiness` across `co2_rel` to see the relationship between happiness and contribution to continents CO2 emissions.
 ```{r}
 regress <- lm(country_happiness ~ co2_rel, df_by_country)
-summary(regress) %>% 
-  tidy() %>%
-  kable(digits = c(0, 2, 2, 2, 10)) %>%
-  kable_material_dark()
+summary(regress)
 ```
 The above `summary(regress)` shows the `below average` variable is significant at 5%.
 We can infer that countries who contribute CO2 emissions below its continent's average have an average happiness score 10.59 lower than those countries who contribute above its continent average CO2.
@@ -524,9 +407,6 @@ happy_and_green %>%
   geom_point() + 
   geom_text(aes(label = country, color = country), show.legend = F)
 
-happy_and_green %>% 
-  kable(digits = c(0, 0, 2, 2, 2, 2)) %>%
-  kable_material_dark()
 ```
 
 
