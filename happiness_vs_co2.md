@@ -1,6 +1,5 @@
 World Happiness Score vs CO2 Emissions
 ================
-Jackson
 2022-06-01
 
 Understanding the factors which attribute to happiness allow countries
