@@ -2,6 +2,7 @@
 title: "World Happiness Score vs CO2 Emissions"
 author: "Jackson"
 output: github_document
+always_allow_html: true
 date: '2022-06-01'
 ---
 
