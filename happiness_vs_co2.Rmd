@@ -1,7 +1,7 @@
 ---
 title: "World Happiness Score vs CO2 Emissions"
 author: "Jackson"
-output: github_document
+output: html_document
 keep_md: true
 date: '2022-06-01'
 ---
@@ -13,6 +13,7 @@ Understanding the factors which attribute to happiness allow countries with low 
 ```{r setup, include=FALSE}
 ## Global options
 knitr::opts_chunk$set(cache = TRUE, warning = FALSE)
+
 ```
 
 
