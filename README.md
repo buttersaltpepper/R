@@ -1,1 +1,1 @@
-(Statistics with R)[happiness_vs_co2.md]
+[Statistics with R](happiness_vs_co2.md)
